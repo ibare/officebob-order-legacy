@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            background-image: linear-gradient(135deg, #8eaaff, #80ff84);
+        }
+        .thin {
+            font-weight: 200;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col s12 center-align">
+            <h1 itemprop="description" style="font-size: 29px;">
+                <strong class="bold">우아한 키친 월요 라면</strong>
+                <span class="thin">주문 페이지입니다.<br>세번의 주문 찬스! 30그릇의 행운을 잡아요!</span>
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 m4">
+            <div class="card medium">
+                <div class="card-image">
+                    <img src="http://cfile26.uf.tistory.com/image/01077239519440661BB090">
+                    <span class="card-title" style="font-size: 30px;font-weight: bold;">
+                        <span class="num-order 1st">0</span>/30<span class="current 1st thin"></span>
+                    </span>
+                </div>
+                <div class="card-content">
+                    <p>4시 타임입니다. 주문하신 분들은 가능하면 4시 20분까지 와주세요.</p>
+                </div>
+                <div class="card-action">
+                    <a href="#" class="new order" data-time="1st">한그릇 예약</a>
+                    <a href="#" class="cancel order right" style="color:red" data-time="1st">한그릇 취소</a>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m4">
+            <div class="card medium">
+                <div class="card-image">
+                    <img src="http://cfile26.uf.tistory.com/image/01077239519440661BB090">
+                    <span class="card-title" style="font-size: 30px;font-weight: bold;">
+                        <span class="num-order 2th">0</span>/30<span class="current 2th thin"></span>
+                    </span>
+                </div>
+                <div class="card-content">
+                    <p>4:30분 타임입니다. 주문하신 분들은 가능하면 4시 50분까지 와주세요.</p>
+                </div>
+                <div class="card-action">
+                    <a href="#" class="new order" data-time="2th">한그릇 예약</a>
+                    <a href="#" class="cancel order right" style="color:red" data-time="2th">한그릇 취소</a>
+                </div>
+            </div>
+        </div>
+        <div class="col s12 m4">
+            <div class="card medium">
+                <div class="card-image">
+                    <img src="http://cfile26.uf.tistory.com/image/01077239519440661BB090">
+                    <span class="card-title" style="font-size: 30px;font-weight: bold;">
+                        <span class="num-order 3rd">0</span>/30<span class="current 3rd thin"></span>
+                    </span>
+                </div>
+                <div class="card-content">
+                    <p>5시 타임입니다. 주문하신 분들은 가능하면 5시 20분까지 와주세요.</p>
+                </div>
+                <div class="card-action">
+                    <a href="#" class="new order" data-time="3rd">한그릇 예약</a>
+                    <a href="#" class="cancel order right" style="color:red" data-time="3rd">한그릇 취소</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 center-align">
+            <h4 itemprop="description" style="font-size: 16px;">
+                <span class="thin">라면 수량에 제한이 있기 때문에 확실히 배고프고 드실 분들만 주문해 주시기 바랍니다.</span>
+            </h4>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function() {
+        var socket = io();
+        var $body = $('body');
+        var $window = $(window);
+        var officebobOrders = window.localStorage.getItem('officebob-orders');
+
+        var updateOfficebobOrders = function() {
+            window.localStorage.setItem('officebob-orders', JSON.stringify(officebobOrders));
+        };
+
+        var updateOrderCancelUI = function() {
+            $('.cancel.order[data-time=1st]').toggleClass('hide', officebobOrders['1st'] == 0);
+            $('.cancel.order[data-time=2th]').toggleClass('hide', officebobOrders['2th'] == 0);
+            $('.cancel.order[data-time=3rd]').toggleClass('hide', officebobOrders['3rd'] == 0);
+
+            if (officebobOrders['1st'] > 0) {
+                $('.current.1st').text(' - '+officebobOrders['1st']);
+            } else {
+                $('.current.1st').text('');
+            }
+
+            if (officebobOrders['2th'] > 0) {
+                $('.current.2th').text(' - '+officebobOrders['2th']);
+            } else {
+                $('.current.2th').text('');
+            }
+
+            if (officebobOrders['3rd'] > 0) {
+                $('.current.3rd').text(' - '+officebobOrders['3rd']);
+            } else {
+                $('.current.3rd').text('');
+            }
+        };
+
+        officebobOrders = officebobOrders ? JSON.parse(officebobOrders) : {
+            '1st': 0,
+            '2th': 0,
+            '3rd': 0
+        };
+
+        $body.width($window.width());
+        $body.height($window.height());
+
+        $window.on('resize', function() {
+            $body.width($window.width());
+            $body.height($window.height());
+        });
+
+        updateOrderCancelUI();
+
+        socket.on('current orders', function(numOrders) {
+            Object.keys(numOrders).forEach(function(key) {
+                $('.num-order.'+key).text(numOrders[key]);
+            });
+        });
+
+        $('.new.order').on('click', function(event) {
+            officebobOrders[event.target.dataset.time]++;
+            socket.emit('new order', event.target.dataset.time);
+            updateOfficebobOrders();
+            updateOrderCancelUI();
+        });
+
+        $('.cancel.order').on('click', function(event) {
+            officebobOrders[event.target.dataset.time]--;
+            socket.emit('cancel order', event.target.dataset.time);
+            updateOfficebobOrders();
+            updateOrderCancelUI();
+        });
+    });
+</script>
+</body>
+</html>
