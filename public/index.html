@@ -149,6 +149,17 @@
         var $window = $(window);
         var officebobOrders = window.localStorage.getItem('officebob-orders');
 
+        var initOfficebobOrder = function() {
+            window.localStorage.setItem('officebob-orders', JSON.stringify({
+                '1st': 0,
+                '2th': 0,
+                '3rd': 0,
+                'create': Date.now()
+            }));
+
+            officebobOrders = window.localStorage.getItem('officebob-orders');
+        };
+
         var updateOfficebobOrders = function() {
             window.localStorage.setItem('officebob-orders', JSON.stringify(officebobOrders));
         };
@@ -194,6 +205,10 @@
         updateOrderCancelUI();
 
         socket.on('current orders', function(numOrders) {
+            if (!officebobOrders.create || officebobOrders.create < numOrders.create) {
+                initOfficebobOrder();
+            }
+
             Object.keys(numOrders).forEach(function(key) {
                 $('.num-order.'+key).text(numOrders[key]);
             });

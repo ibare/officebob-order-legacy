@@ -8,7 +8,8 @@ var mongodb = null;
 var numOrders = {
   '1st': 0,
   '2th': 0,
-  '3rd': 0
+  '3rd': 0,
+  create: Date.now()
 };
 
 mongo.connect('mongodb://officebob:officeboborder@ds011251.mlab.com:11251/heroku_q9xb9lk4', function(err, db) {
@@ -26,8 +27,11 @@ app.get('/api/reset', (req, res) => {
   numOrders = {
     '1st': 0,
     '2th': 0,
-    '3rd': 0
+    '3rd': 0,
+    create: Date.now()
   };
+
+  res.send('ok');
 });
 
 app.get('/api/backup', (req, res) => {
@@ -36,6 +40,10 @@ app.get('/api/backup', (req, res) => {
 
 app.get('/api/restore', (req, res) => {
 
+});
+
+app.get('/api/gettime', (req, res) => {
+  res.json({ currentDatetime: Date.now() });
 });
 
 io.sockets.on('connection', function(socket) {
