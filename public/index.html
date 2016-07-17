@@ -207,7 +207,7 @@
         updateOrderCancelUI();
 
         socket.on('current orders', function(numOrders) {
-            if (!officebobOrders.create || officebobOrders.create < numOrders.create) {
+            if (!officebobOrders.create) {
                 initOfficebobOrder();
             }
 
