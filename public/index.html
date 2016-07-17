@@ -192,7 +192,8 @@
         officebobOrders = officebobOrders ? JSON.parse(officebobOrders) : {
             '1st': 0,
             '2th': 0,
-            '3rd': 0
+            '3rd': 0,
+            create: Date.now()
         };
 
         $body.width($window.width());
