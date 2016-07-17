@@ -22,6 +22,22 @@ mongo.connect('mongodb://officebob:officeboborder@ds011251.mlab.com:11251/heroku
 
 app.use(express.static('public'));
 
+app.get('/api/reset', (req, res) => {
+  numOrders = {
+    '1st': 0,
+    '2th': 0,
+    '3rd': 0
+  };
+});
+
+app.get('/api/backup', (req, res) => {
+
+});
+
+app.get('/api/restore', (req, res) => {
+
+});
+
 io.sockets.on('connection', function(socket) {
   socket.join('orders');
 
@@ -31,6 +47,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('new order', function(time) {
     if (numOrders[time] < 30) {
       numOrders[time]++;
+      socket.emit('new order:response', time);
     }
 
     socket.emit('current orders', numOrders);
@@ -38,7 +55,10 @@ io.sockets.on('connection', function(socket) {
   });
 
   socket.on('cancel order', function(time) {
-    numOrders[time]--;
+    if (numOrders[time] > 0) {
+      numOrders[time]--;
+      socket.emit('cancel order:response', time);
+    }
 
     socket.emit('current orders', numOrders);
     socket.to('orders').emit('current orders', numOrders);
