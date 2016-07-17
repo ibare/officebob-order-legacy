@@ -194,6 +194,7 @@
             socket.emit('new order', event.target.dataset.time);
             updateOfficebobOrders();
             updateOrderCancelUI();
+            return false;
         });
 
         $('.cancel.order').on('click', function(event) {
@@ -201,6 +202,7 @@
             socket.emit('cancel order', event.target.dataset.time);
             updateOfficebobOrders();
             updateOrderCancelUI();
+            return false;
         });
 
         setInterval(function() {
