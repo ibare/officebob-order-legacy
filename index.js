@@ -31,7 +31,7 @@ app.get('/api/reset', (req, res) => {
     create: Date.now()
   };
 
-  res.send('ok');
+  res.redirect('/');
 });
 
 app.get('/api/backup', (req, res) => {
