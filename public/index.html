@@ -59,6 +59,9 @@
             color: #888;
             font-weight: 200;
         }
+        .min {
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -68,8 +71,8 @@
             <h1 class="headline" itemprop="description" style="font-size: 29px;">
                 <span class="time">7월 18일</span><strong class="bold">우아한키친라면</strong><br>
                 <span class="thin">90그릇 준비했습니다</span><br>
-                <span class="warning">키친에서 결제는 필수 :-)</span>
-
+                <span class="warning">키친에서 결제는 필수 :-)</span><br>
+                <span class="thin min">현재 함께하는 사람은 <span class="number-of-connection">.</span>명</span>
             </h1>
         </div>
     </div>
@@ -149,16 +152,15 @@
         var $body = $('body');
         var $window = $(window);
         var officebobOrders = window.localStorage.getItem('officebob-orders');
-
         var initOfficebobOrder = function() {
-            window.localStorage.setItem('officebob-orders', JSON.stringify({
+            officebobOrders = {
                 '1st': 0,
                 '2th': 0,
                 '3rd': 0,
-                'create': Date.now()
-            }));
+                'slug': ''
+            };
 
-            officebobOrders = window.localStorage.getItem('officebob-orders');
+            window.localStorage.setItem('officebob-orders', JSON.stringify(officebobOrders));
         };
 
         var updateOfficebobOrders = function() {
@@ -189,12 +191,13 @@
             }
         };
 
-        officebobOrders = officebobOrders ? JSON.parse(officebobOrders) : {
-            '1st': 0,
-            '2th': 0,
-            '3rd': 0,
-            create: Date.now()
-        };
+        if (officebobOrders) {
+            officebobOrders = JSON.parse(officebobOrders);
+        } else {
+            initOfficebobOrder();
+        }
+
+        socket.emit('init');
 
         $body.width($window.width());
         $body.height($window.height());
@@ -206,10 +209,13 @@
 
         updateOrderCancelUI();
 
+        socket.on('init:response', function(numOrders) {
+            officebobOrders.slug = numOrders.slug;
+        });
+
         socket.on('current orders', function(numOrders) {
-            if (!officebobOrders.create) {
-                initOfficebobOrder();
-            }
+            !officebobOrders.slug && initOfficebobOrder();
+            officebobOrders.slug != numOrders['slug'] && initOfficebobOrder();
 
             Object.keys(numOrders).forEach(function(key) {
                 $('.num-order.'+key).text(numOrders[key]);
@@ -226,6 +232,10 @@
             officebobOrders[time]--;
             updateOfficebobOrders();
             updateOrderCancelUI();
+        });
+
+        socket.on('connection status', function(num) {
+            $('.number-of-connection').text(num);
         });
 
         $('.new.order').on('click', function(event) {

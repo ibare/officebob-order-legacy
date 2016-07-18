@@ -4,13 +4,29 @@ var server = require('http').Server(app);
 var mongo = require('mongodb').MongoClient;
 var io = require('socket.io')(server);
 
+var orderdate = '2016-07-18';
 var mongodb = null;
+var numConnection = 0;
 var numOrders = {
   '1st': 0,
   '2th': 0,
   '3rd': 0,
-  create: Date.now()
+  slug: ''
 };
+
+function updateOrders() {
+  var orders = mongodb.collection('orders');
+
+  orders.updateOne({ orderdate: orderdate }, {
+      $set: {
+        '1st': numOrders['1st'],
+        '2th': numOrders['2th'],
+        '3rd': numOrders['3rd']
+      }}, function(err, result) {
+      console.log('update!');
+    }
+  );
+}
 
 mongo.connect('mongodb://officebob:officeboborder@ds011251.mlab.com:11251/heroku_q9xb9lk4', function(err, db) {
   if (err) {
@@ -18,43 +34,44 @@ mongo.connect('mongodb://officebob:officeboborder@ds011251.mlab.com:11251/heroku
   }
 
   mongodb = db;
-  console.log("Connected mongodb");
+
+  var orders = mongodb.collection('orders');
+
+  orders.find({ orderdate: orderdate }).toArray((err, docs) => {
+    if (err) {
+      return console.error(err);
+    }
+
+    numOrders['1st'] = docs[0]['1st'];
+    numOrders['2th'] = docs[0]['2th'];
+    numOrders['3rd'] = docs[0]['3rd'];
+    numOrders['slug'] = docs[0]['slug'];
+
+    console.log("Connected mongodb");
+  });
 });
 
 app.use(express.static('public'));
 
-app.get('/api/reset', (req, res) => {
-  numOrders = {
-    '1st': 0,
-    '2th': 0,
-    '3rd': 0,
-    create: Date.now()
-  };
-
-  res.redirect('/');
-});
-
-app.get('/api/backup', (req, res) => {
-
-});
-
-app.get('/api/restore', (req, res) => {
-
-});
-
-app.get('/api/gettime', (req, res) => {
-  res.json({ currentDatetime: Date.now() });
-});
-
 io.sockets.on('connection', function(socket) {
+  numConnection++;
+
   socket.join('orders');
+
+  socket.emit('connection status', numConnection);
+  socket.to('orders').emit('connection status', numConnection);
 
   socket.emit('current orders', numOrders);
   socket.to('orders').emit('current orders', numOrders);
 
+  socket.on('init', function() {
+    socket.emit('init:response', numOrders);
+  });
+
   socket.on('new order', function(time) {
     if (numOrders[time] < 30) {
       numOrders[time]++;
+      updateOrders();
       socket.emit('new order:response', time);
     }
 
@@ -65,6 +82,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('cancel order', function(time) {
     if (numOrders[time] > 0) {
       numOrders[time]--;
+      updateOrders();
       socket.emit('cancel order:response', time);
     }
 
@@ -73,15 +91,12 @@ io.sockets.on('connection', function(socket) {
   });
 
   console.log('connect');
-  // so.on('mongo/test', function () {
-  //   var collection = mongodb.collection('test');
-  //   // Find some documents
-  //   collection.find({}).toArray(function(err, docs) {
-  //     so.emit('mongo/test', docs);
-  //   });
-  // });
+
   socket.on('disconnect', function () {
+    numConnection--;
     console.log('disconnect');
+    socket.emit('connection status', numConnection);
+    socket.to('orders').emit('connection status', numConnection);
   });
 });
 
