@@ -62,6 +62,9 @@
         .min {
             font-size: 16px;
         }
+        .cancel.order {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -168,9 +171,11 @@
         };
 
         var updateOrderCancelUI = function() {
+            /*
             $('.cancel.order[data-time=1st]').toggleClass('hide', officebobOrders['1st'] == 0);
             $('.cancel.order[data-time=2th]').toggleClass('hide', officebobOrders['2th'] == 0);
             $('.cancel.order[data-time=3rd]').toggleClass('hide', officebobOrders['3rd'] == 0);
+            */
 
             if (officebobOrders['1st'] > 0) {
                 $('.current.1st').text(' + '+officebobOrders['1st']);
@@ -244,6 +249,7 @@
         });
 
         $('.cancel.order').on('click', function(event) {
+            return false;
             socket.emit('cancel order', event.target.dataset.time);
             return false;
         });
