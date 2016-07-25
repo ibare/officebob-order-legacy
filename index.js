@@ -4,14 +4,14 @@ var server = require('http').Server(app);
 var mongo = require('mongodb').MongoClient;
 var io = require('socket.io')(server);
 
-var orderdate = '2016-07-18';
+var orderdate = '2016-07-24';
 var mongodb = null;
 var numConnection = 0;
 var numOrders = {
   '1st': 0,
   '2th': 0,
   '3rd': 0,
-  slug: ''
+  slug: 'A'
 };
 
 function updateOrders() {
