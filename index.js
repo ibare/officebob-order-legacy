@@ -4,7 +4,7 @@ var server = require('http').Server(app);
 var mongo = require('mongodb').MongoClient;
 var io = require('socket.io')(server);
 
-var orderdate = '2016-08-01';
+var orderdate = '2016-08-08';
 var mongodb = null;
 var numConnection = 0;
 var numOrders = {
@@ -41,6 +41,8 @@ mongo.connect('mongodb://officebob:officeboborder@ds011251.mlab.com:11251/heroku
     if (err) {
       return console.error(err);
     }
+
+    console.log(docs);
 
     numOrders['1st'] = docs[0]['1st'];
     numOrders['2th'] = docs[0]['2th'];
